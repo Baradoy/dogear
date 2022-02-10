@@ -19,6 +19,13 @@ defmodule DogearWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+
+    live "/books", BookLive.Index, :index
+    live "/books/new", BookLive.Index, :new
+    live "/books/:id/edit", BookLive.Index, :edit
+
+    live "/books/:id", BookLive.Show, :show
+    live "/books/:id/show/edit", BookLive.Show, :edit
   end
 
   # Other scopes may use custom stacks.
@@ -44,8 +51,12 @@ defmodule DogearWeb.Router do
   end
 
   defp auth(conn, _opts) do
-    username = System.fetch_env!("AUTH_USERNAME")
-    password = System.fetch_env!("AUTH_PASSWORD")
-    Plug.BasicAuth.basic_auth(conn, username: username, password: password)
+    if !(Mix.env() in [:dev, :test]) do
+      username = System.fetch_env!("AUTH_USERNAME")
+      password = System.fetch_env!("AUTH_PASSWORD")
+      Plug.BasicAuth.basic_auth(conn, username: username, password: password)
+    end
+
+    conn
   end
 end

@@ -1,0 +1,45 @@
+<h1>Listing Books</h1>
+
+<%= if @live_action in [:new, :edit] do %>
+  <.modal return_to={Routes.book_index_path(@socket, :index)}>
+    <.live_component
+      module={DogearWeb.BookLive.FormComponent}
+      id={@book.id || :new}
+      title={@page_title}
+      action={@live_action}
+      book={@book}
+      return_to={Routes.book_index_path(@socket, :index)}
+    />
+  </.modal>
+<% end %>
+
+<table>
+  <thead>
+    <tr>
+      <th>Filename</th>
+      <th>Title</th>
+      <th>Author</th>
+      <th>Root file name</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="books">
+    <%= for book <- @books do %>
+      <tr id={"book-#{book.id}"}>
+        <td><%= book.filename %></td>
+        <td><%= book.title %></td>
+        <td><%= book.author %></td>
+        <td><%= book.root_file_name %></td>
+
+        <td>
+          <span><%= live_redirect "Show", to: Routes.book_show_path(@socket, :show, book) %></span>
+          <span><%= live_patch "Edit", to: Routes.book_index_path(@socket, :edit, book) %></span>
+          <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: book.id, data: [confirm: "Are you sure?"] %></span>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<span><%= live_patch "New Book", to: Routes.book_index_path(@socket, :new) %></span>
