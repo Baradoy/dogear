@@ -1,5 +1,13 @@
 # Dogear
 
+## Auth
+
+Currently DogEar works with a single user. You can setup the username and password for the user by setting `AUTH_USERNAME` and `AUTH_PASSWORD` environment variables. Create `.envrc.private` with the environment variable you wish to override in `.envrc` and run `direnv allow`.
+
+## Installation
+
+Install Asdf on your system then run `asdf install` to install.
+
 To start your Phoenix server:
 
   * Install dependencies with `mix deps.get`

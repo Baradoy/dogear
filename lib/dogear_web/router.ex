@@ -2,6 +2,7 @@ defmodule DogearWeb.Router do
   use DogearWeb, :router
 
   pipeline :browser do
+    plug :auth
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
@@ -40,5 +41,11 @@ defmodule DogearWeb.Router do
 
       live_dashboard "/dashboard", metrics: DogearWeb.Telemetry
     end
+  end
+
+  defp auth(conn, _opts) do
+    username = System.fetch_env!("AUTH_USERNAME")
+    password = System.fetch_env!("AUTH_PASSWORD")
+    Plug.BasicAuth.basic_auth(conn, username: username, password: password)
   end
 end
