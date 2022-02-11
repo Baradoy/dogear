@@ -2,8 +2,7 @@ defmodule Dogear.Repo.Migrations.CreateBooks do
   use Ecto.Migration
 
   def change do
-    create table(:books, primary_key: false) do
-      add :id, :binary_id, primary_key: true
+    create table(:books) do
       add :filename, :string
       add :title, :string
       add :author, :string

@@ -4,9 +4,11 @@ defmodule Dogear.Books do
   """
 
   import Ecto.Query, warn: false
-  alias Dogear.Repo
 
   alias Dogear.Books.Book
+  alias Dogear.Metadata
+  alias Dogear.Repo
+  alias Dogear.Zip
 
   @doc """
   Returns the list of books.
@@ -49,10 +51,25 @@ defmodule Dogear.Books do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_book(attrs \\ %{}) do
-    %Book{}
-    |> Book.changeset(attrs)
-    |> Repo.insert()
+  def create_book(%{"filename" => filename}) do
+    with {:ok, _mimetype} <- Zip.read(filename, "mimetype"),
+         {:ok, container} <- Zip.read(filename, "META-INF/container.xml"),
+         {:ok, container_document} <- Floki.parse_document(container),
+         [root_file_name] <- Floki.attribute(container_document, "[full-path]", "full-path"),
+         {:ok, metadata} <- Metadata.read(filename, root_file_name) do
+      attrs = %{
+        filename: filename,
+        root_file_name: root_file_name,
+        title: Metadata.get_title(metadata),
+        author: Metadata.get_author(metadata)
+      }
+
+      %Book{}
+      |> Book.changeset(attrs)
+      |> Repo.insert()
+    else
+      err -> err
+    end
   end
 
   @doc """

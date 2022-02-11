@@ -8,8 +8,7 @@
 import Config
 
 config :dogear,
-  ecto_repos: [Dogear.Repo],
-  generators: [binary_id: true]
+  ecto_repos: [Dogear.Repo]
 
 # Configures the endpoint
 config :dogear, DogearWeb.Endpoint,
