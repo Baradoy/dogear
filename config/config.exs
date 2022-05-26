@@ -7,6 +7,8 @@
 # General application configuration
 import Config
 
+config :dogear, :environment, Mix.env()
+
 config :dogear,
   ecto_repos: [Dogear.Repo]
 

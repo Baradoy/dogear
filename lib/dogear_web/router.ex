@@ -18,7 +18,7 @@ defmodule DogearWeb.Router do
   scope "/", DogearWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
+    live "/", BookmarkLive.Index, :index
 
     live "/books", BookLive.Index, :index
     live "/books/new", BookLive.Index, :new
@@ -51,7 +51,7 @@ defmodule DogearWeb.Router do
   end
 
   defp auth(conn, _opts) do
-    if !(Mix.env() in [:dev, :test]) do
+    if !(Application.get_env(:dogear, :environment) in [:dev, :test]) do
       username = System.fetch_env!("AUTH_USERNAME")
       password = System.fetch_env!("AUTH_PASSWORD")
       Plug.BasicAuth.basic_auth(conn, username: username, password: password)

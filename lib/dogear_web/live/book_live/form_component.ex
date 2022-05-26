@@ -1,4 +1,8 @@
 defmodule DogearWeb.BookLive.FormComponent do
+  @moduledoc """
+  Basic Form Component
+  """
+
   use DogearWeb, :live_component
 
   alias Dogear.Books

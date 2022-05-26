@@ -1,8 +1,11 @@
 defmodule DogearWeb.BookLive.Index do
+  @moduledoc """
+  Book listing
+  """
   use DogearWeb, :live_view
 
   alias Dogear.Books
-  alias Dogear.Books.Book
+  alias Dogear.Schema.Book
 
   @impl true
   def mount(_params, _session, socket) do
@@ -33,6 +36,12 @@ defmodule DogearWeb.BookLive.Index do
   end
 
   @impl true
+  def handle_event("read", %{"id" => id}, socket) do
+    book = Books.get_book!(id)
+
+    {:noreply, push_redirect(socket, to: Routes.book_show_path(socket, :show, book))}
+  end
+
   def handle_event("delete", %{"id" => id}, socket) do
     book = Books.get_book!(id)
     {:ok, _} = Books.delete_book(book)

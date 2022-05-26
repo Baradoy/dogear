@@ -1,41 +1,7 @@
-<h1>Show Book</h1>
-
-<%= if @live_action in [:edit] do %>
-  <.modal return_to={Routes.book_show_path(@socket, :show, @book)}>
-    <.live_component
-      module={DogearWeb.BookLive.FormComponent}
-      id={@book.id}
-      title={@page_title}
-      action={@live_action}
-      book={@book}
-      return_to={Routes.book_show_path(@socket, :show, @book)}
-    />
-  </.modal>
-<% end %>
-
-<ul>
-
-  <li>
-    <strong>Filename:</strong>
-    <%= @book.filename %>
-  </li>
-
-  <li>
-    <strong>Title:</strong>
-    <%= @book.title %>
-  </li>
-
-  <li>
-    <strong>Author:</strong>
-    <%= @book.author %>
-  </li>
-
-  <li>
-    <strong>Root file name:</strong>
-    <%= @book.root_file_name %>
-  </li>
-
-</ul>
-
-<span><%= live_patch "Edit", to: Routes.book_show_path(@socket, :edit, @book), class: "button" %></span> |
-<span><%= live_redirect "Back", to: Routes.book_index_path(@socket, :index) %></span>
+<div class="wrapper">
+  <header> <%= @book.title %> <a phx-click="previousPlace" href="#">Previous</a> <a phx-click="nextPlace" href="#">Next</a> </header>
+  <div id="dog-ear-container" phx-hook="IntersectionObserver" class="content">
+    <%= raw(@render) %>
+  </div>
+  <footer> <a phx-click="previousPlace" href="#">Previous</a> <a phx-click="nextPlace" href="#">Next</a> </footer>
+</div>
