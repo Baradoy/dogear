@@ -5,7 +5,7 @@ defmodule Dogear.Books do
 
   import Ecto.Query, warn: false
 
-  alias Dogear.Books.Book
+  alias Dogear.Schema.Book
   alias Dogear.Metadata
   alias Dogear.Repo
   alias Dogear.Zip

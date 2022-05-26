@@ -1,6 +1,17 @@
-defmodule Dogear.Books.Book do
+defmodule Dogear.Schema.Book do
+  @moduledoc """
+  The basic information for an epub.
+  """
+
   use Ecto.Schema
   import Ecto.Changeset
+
+  @type t :: %__MODULE__{
+          author: String.t(),
+          filename: String.t(),
+          root_file_name: String.t(),
+          title: String.t()
+        }
 
   schema "books" do
     field :author, :string

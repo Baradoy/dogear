@@ -1,4 +1,8 @@
 defmodule Dogear.Metadata do
+  @moduledoc """
+  Reads Metadata from an epub
+  """
+
   alias Dogear.Zip
 
   @keys [
@@ -21,7 +25,7 @@ defmodule Dogear.Metadata do
   @struct Enum.map(@keys, fn key -> {key, []} end)
   defstruct @struct
 
-  @type t :: %{
+  @type t :: %__MODULE__{
           identifier: [String.t()],
           title: [String.t()],
           language: [String.t()],
@@ -39,7 +43,7 @@ defmodule Dogear.Metadata do
           type: [String.t()]
         }
 
-  @spec read(String.t(), String.t()) :: t()
+  @spec read(String.t(), String.t()) :: {:ok, t()} | {:error, any()}
   def read(archive, root_file_name) do
     case Zip.read(archive, root_file_name) do
       {:ok, root_file} -> parse_root_file(root_file)
