@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  buildAndTest:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        elixir: [1.13.2]
+        otp: [24.2]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Elixir
+        uses: erlef/setup-elixir@v1
+        with:
+          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{ matrix.otp }}
+      - name: Cache Elixir dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            deps
+            _build
+            priv/plts
+          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
+      - name: Install dependencies
+        run: mix deps.get && mix deps.unlock --check-unused
+      - name: Compile
+        run: mix deps.compile --warnings-as-errors
+      - name: Run test
+        run: mix test
+      - name: Check Formatting
+        run: mix format --check-formatted
+      - name: Run Tests
+        run: mix test
+      - name: Dialyzer
+        run: mix dialyzer --halt-exit-status
+      - name: Check Credo
+        run: mix credo
