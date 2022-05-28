@@ -58,7 +58,12 @@ defmodule DogearWeb.BookLive.Show do
   def handle_event("updateAnchor", %{"anchorId" => anchor_id}, socket) do
     {:ok, _bookmark} = Bookmarks.update_bookmark(socket.assigns.bookmark, %{anchor_id: anchor_id})
 
-    Phoenix.PubSub.broadcast(Dogear.PubSub, topic(socket), {"updateAnchor", %{anchor_id: anchor_id}, self()})
+    Phoenix.PubSub.broadcast(
+      Dogear.PubSub,
+      topic(socket),
+      {"updateAnchor", %{anchor_id: anchor_id}, self()}
+    )
+
     {:noreply, socket}
   end
 

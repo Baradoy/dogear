@@ -1,4 +1,8 @@
-const observerHandler = (inViewMap, currentAnchor, scrollTo, pushAnchor) => (entries) => {
+// Scope is difficult.
+let scrollingTo = null;
+let scrollingToTimer = null;
+
+const observerHandler = (inViewMap, currentAnchor, pushAnchor) => (entries) => {
   // Remove items that are no longer in view
   entries
     .filter(({ isIntersecting }) => !isIntersecting)
@@ -28,12 +32,15 @@ const observerHandler = (inViewMap, currentAnchor, scrollTo, pushAnchor) => (ent
   });
 
   if (topAnchor[0] != currentAnchor) {
-    pushAnchor(topAnchor[0]);
     currentAnchor = topAnchor[0];
+    !scrollingTo && pushAnchor(topAnchor[0]);
+  }
+  if (topAnchor[0] == scrollingTo) {
+    scrollingTo = null;
   }
 };
 
-function debounce(func, timeout = 300){
+function debounce(func, timeout = 300) {
   let timer;
   let value;
 
@@ -41,25 +48,31 @@ function debounce(func, timeout = 300){
     if (value) {
       func.apply(this, value);
       value = null;
-      timer = setTimeout(fire, timeout)
+      timer = setTimeout(fire, timeout);
     } else {
       timer = null;
     }
-  }
+  };
 
   return (...args) => {
     value = args;
     if (!timer) {
-      timer = setTimeout(fire)
+      timer = setTimeout(fire);
     }
   };
 }
 
-
 const intersectionObserver = {
   mounted() {
     this.handleEvent("scrollTo", ({ anchorId }) => {
-      document.getElementById(anchorId).scrollIntoView();
+      scrollingTo = anchorId;
+      document.getElementById(anchorId).scrollIntoView({ behavior: "smooth" });
+      clearTimeout(scrollingToTimer);
+      scrollingToTimer =
+        anchorId &&
+        setTimeout(() => {
+          scrollingTo = null;
+        }, 2000);
     });
 
     this.observe();
@@ -76,12 +89,13 @@ const intersectionObserver = {
   observe() {
     this.currentAnchor = "";
     this.inView = new Map();
-    this.scrollTo = null;
 
-    const pushAnchor = debounce((anchorId) => this.pushEvent("updateAnchor", { anchorId }))
+    const pushAnchor = debounce((anchorId) =>
+      this.pushEvent("updateAnchor", { anchorId })
+    );
 
     const observer = new IntersectionObserver(
-      observerHandler(this.inView, this.currentAnchor, this.scrollTo, pushAnchor)
+      observerHandler(this.inView, this.currentAnchor, pushAnchor)
     );
     this.el.querySelectorAll("*[id]").forEach((elem) => observer.observe(elem));
 
