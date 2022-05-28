@@ -21,7 +21,12 @@ defmodule Dogear.BookmarksTest do
     end
 
     test "create_bookmark/1 with valid data creates a bookmark" do
-      valid_attrs = %{anchor_id: "some anchor_id", book_id: 42, idref: "some idref", spine_index: 0}
+      valid_attrs = %{
+        anchor_id: "some anchor_id",
+        book_id: 42,
+        idref: "some idref",
+        spine_index: 0
+      }
 
       assert {:ok, %Bookmark{} = bookmark} = Bookmarks.create_bookmark(valid_attrs)
       assert bookmark.anchor_id == "some anchor_id"

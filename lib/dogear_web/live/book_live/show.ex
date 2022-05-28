@@ -27,6 +27,7 @@ defmodule DogearWeb.BookLive.Show do
       |> assign(:page_title, book.title)
       |> assign_bookmark(bookmark)
       |> push_scroll()
+      |> subscribe()
 
     {:ok, socket}
   end
@@ -38,6 +39,8 @@ defmodule DogearWeb.BookLive.Show do
 
     socket = assign_bookmark(socket, bookmark)
 
+    Phoenix.PubSub.broadcast(Dogear.PubSub, topic(socket), {"updateIdref", bookmark, self()})
+
     {:noreply, socket}
   end
 
@@ -47,15 +50,33 @@ defmodule DogearWeb.BookLive.Show do
 
     socket = assign_bookmark(socket, bookmark)
 
+    Phoenix.PubSub.broadcast(Dogear.PubSub, topic(socket), {"updateIdref", bookmark, self()})
+
     {:noreply, socket}
   end
 
   def handle_event("updateAnchor", %{"anchorId" => anchor_id}, socket) do
-    {:ok, bookmark} = Bookmarks.update_bookmark(socket.assigns.bookmark, %{anchor_id: anchor_id})
+    {:ok, _bookmark} = Bookmarks.update_bookmark(socket.assigns.bookmark, %{anchor_id: anchor_id})
 
-    socket
-    |> assign(:bookmark, bookmark)
+    Phoenix.PubSub.broadcast(Dogear.PubSub, topic(socket), {"updateAnchor", %{anchor_id: anchor_id}, self()})
+    {:noreply, socket}
+  end
 
+  @impl true
+  def handle_info({"updateAnchor", %{anchor_id: anchor_id}, pid}, socket) when pid != self() do
+    {:noreply, push_event(socket, "scrollTo", %{"anchorId" => anchor_id})}
+  end
+
+  def handle_info({"updateAnchor", %{anchor_id: _}, _pid}, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_info({"updateIdref", bookmark, pid}, socket) when pid != self() do
+    socket = assign_bookmark(socket, bookmark)
+    {:noreply, socket}
+  end
+
+  def handle_info({"updateIdref", _bookmark, _pid}, socket) do
     {:noreply, socket}
   end
 
@@ -76,4 +97,14 @@ defmodule DogearWeb.BookLive.Show do
       socket
     end
   end
+
+  defp subscribe(socket) do
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(Dogear.PubSub, topic(socket))
+    end
+
+    socket
+  end
+
+  def topic(socket), do: "bookmark:#{socket.assigns.bookmark.id}"
 end

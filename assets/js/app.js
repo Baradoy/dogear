@@ -25,69 +25,9 @@ import "phoenix_html"
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
+import IntersectionObserver from "./intersectionObserver"
 
-const observerHandler = (inViewMap, pushAnchor) => (entries) => {
-  // Remove items that are no longer in view
-  entries
-    .filter(({ isIntersecting }) => !isIntersecting)
-    .forEach(
-      ({ target }) => inViewMap.delete(target.getAttribute("id"))
-    );
-
-  // Add items that are now in the view
-  entries
-    .filter(({ isIntersecting }) => isIntersecting)
-    .forEach(
-      ({ target }) => inViewMap.set(target.getAttribute("id"), target.offsetTop + target.clientHeight)
-    );
-
-  // Find the highest up element (measure from the bottom of the element)
-  const topAnchor = Array.from(inViewMap).reduceRight((acc, anchor) => {
-    if (!acc || anchor[1] < acc[1]) {
-      return anchor;
-    } else {
-      return acc
-    }
-  });
-
-  pushAnchor(topAnchor[0])
-};
-
-const Hooks = {}
-Hooks.IntersectionObserver = {
-  mounted() {
-    this.handleEvent("scrollTo", ({ anchorId }) => {
-      document.getElementById(anchorId).scrollIntoView();
-    })
-
-    const inViewMap = new Map();
-    const pushAnchor = (anchorId) => (this.pushEvent("updateAnchor", { anchorId }))
-
-    const observer = new IntersectionObserver(observerHandler(inViewMap, pushAnchor));
-    this.el.querySelectorAll("*[id]").forEach(elem => observer.observe(elem));
-
-    this.el.inView = inViewMap;
-    this.el.observer = observer;
-  },
-  updated() {
-    if (this.el.observer) {
-      // When live view patches the DOM, we can no longer rely on the old observer.
-      this.el.observer.disconnect();
-      this.el.scrollIntoView();
-    }
-
-    const inViewMap = new Map();
-    const pushAnchor = (anchorId) => (this.pushEvent("updateAnchor", { anchorId }))
-
-    const observer = new IntersectionObserver(observerHandler(inViewMap, pushAnchor), { root: null });
-    this.el.querySelectorAll("*[id]").forEach(elem => observer.observe(elem));
-
-    this.el.inView = inViewMap;
-    this.el.observer = observer;
-  }
-}
-
-
+const Hooks = {IntersectionObserver}
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, { hooks: Hooks, params: {_csrf_token: csrfToken}})
 
