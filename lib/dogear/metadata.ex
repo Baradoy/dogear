@@ -3,8 +3,6 @@ defmodule Dogear.Metadata do
   Reads Metadata from an epub
   """
 
-  alias Dogear.Zip
-
   @keys [
     :identifier,
     :title,
@@ -43,13 +41,8 @@ defmodule Dogear.Metadata do
           type: [String.t()]
         }
 
-  @spec read(String.t(), String.t()) :: {:ok, t()} | {:error, any()}
-  def read(archive, root_file_name) do
-    case Zip.read(archive, root_file_name) do
-      {:ok, root_file} -> parse_root_file(root_file)
-      {:error, _error} -> {:error, "Cannot find root document #{root_file_name}"}
-    end
-  end
+  @spec read(Floki.html_tree()) :: {:ok, t()}
+  def read(root_document), do: {:ok, create_struct_from_document(root_document)}
 
   @spec get_title(t()) :: String.t()
   def get_title(metadata), do: Enum.join(metadata.title, " - ")
@@ -57,15 +50,8 @@ defmodule Dogear.Metadata do
   @spec get_author(t()) :: String.t()
   def get_author(metadata), do: Enum.join(metadata.creator, " - ")
 
-  defp parse_root_file(root_file) do
-    case Floki.parse_document(root_file) do
-      {:ok, document} ->
-        {:ok, create_struct_from_document(document)}
-
-      {:error, error} ->
-        {:error, "Cannot parse root document." <> error}
-    end
-  end
+  @spec make_filename(t()) :: String.t()
+  def make_filename(metadata), do: get_author(metadata) <> "-" <> get_title(metadata)
 
   defp create_struct_from_document(document) do
     case Floki.find(document, "package metadata") do

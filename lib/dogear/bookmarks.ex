@@ -18,14 +18,14 @@ defmodule Dogear.Bookmarks do
     end
   end
 
-  @spec get_or_create_bookmark_by_book(Book.t(), Spine.t()) :: Bookmark.t()
-  def get_or_create_bookmark_by_book(%Book{} = book, %Spine{} = spine) do
+  @spec get_or_create_bookmark_by_book(Book.t()) :: Bookmark.t()
+  def get_or_create_bookmark_by_book(%Book{} = book) do
     case Repo.get_by(Bookmark, book_id: book.id) do
       bookmark when not is_nil(bookmark) ->
         bookmark
 
       nil ->
-        idref = Spines.get_idref(spine, 0)
+        idref = Spines.get_idref(book.spine, 0)
 
         {:ok, bookmark} =
           create_bookmark(%{book: book, anchor_id: "#", idref: idref, spine_index: 0})

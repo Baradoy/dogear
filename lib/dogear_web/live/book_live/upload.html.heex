@@ -1,0 +1,61 @@
+<section phx-drop-target={@uploads.epub.ref}>
+  <%= for entry <- @uploads.epub.entries do %>
+    <article class="upload-entry">
+      <figure>
+        <figcaption><%= entry.client_name %></figcaption>
+      </figure>
+
+      <progress value={entry.progress} max="100"><%= entry.progress %>%</progress>
+
+      <button phx-click="cancel-upload" phx-value-ref={entry.ref} aria-label="cancel">
+        &times;
+      </button>
+
+      <%= for err <- upload_errors(@uploads.epub, entry) do %>
+        <p class="alert alert-danger"><%= error_to_string(err) %></p>
+      <% end %>
+    </article>
+  <% end %>
+</section>
+
+<form id="upload-form" phx-submit="save" phx-change="validate">
+  <%= live_file_input(@uploads.epub) %>
+  <button type="submit">Upload</button>
+</form>
+
+<section>
+  <%= if length(@uploaded_files) > 0 do %>
+    <table>
+      <thead>
+        <tr>
+          <th>Filename</th>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Root file name</th>
+
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="books">
+        <%= for book <- @uploaded_files do %>
+          <tr id={"book-#{book.id}"}>
+            <td><%= book.filename %></td>
+            <td><%= book.title %></td>
+            <td><%= book.author %></td>
+            <td><%= book.root_file_name %></td>
+
+            <td>
+              <span>
+                <%= live_redirect("Read", to: Routes.book_show_path(@socket, :show, book)) %>
+              </span>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+</section>
+
+<%= for err <- upload_errors(@uploads.epub) do %>
+  <p class="alert alert-danger"><%= error_to_string(err) %></p>
+<% end %>

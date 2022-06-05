@@ -7,7 +7,7 @@ defmodule Dogear.Books.Manifests.Manifest do
 
   alias Dogear.Books.Manifests.Item
 
-  defstruct [:items]
+  defstruct [:items, :root_path]
 
   @type t :: %__MODULE__{items: [Item.t()]}
 end

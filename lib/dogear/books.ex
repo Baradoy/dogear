@@ -5,9 +5,12 @@ defmodule Dogear.Books do
 
   import Ecto.Query, warn: false
 
+  alias Dogear.Books.Manifests
+  alias Dogear.Books.Spines
   alias Dogear.Schema.Book
   alias Dogear.Metadata
   alias Dogear.Repo
+  alias Dogear.Document
   alias Dogear.Zip
 
   @doc """
@@ -37,39 +40,21 @@ defmodule Dogear.Books do
       ** (Ecto.NoResultsError)
 
   """
-  def get_book!(id), do: Repo.get!(Book, id)
+  def get_book!(id), do: Book |> Repo.get!(id) |> load_virtual()
 
   @doc """
   Creates a book.
-
-  ## Examples
-
-      iex> create_book(%{field: value})
-      {:ok, %Book{}}
-
-      iex> create_book(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
   """
-  def create_book(%{"filename" => filename}) do
-    with {:ok, _mimetype} <- Zip.read(filename, "mimetype"),
-         {:ok, container} <- Zip.read(filename, "META-INF/container.xml"),
-         {:ok, container_document} <- Floki.parse_document(container),
-         [root_file_name] <- Floki.attribute(container_document, "[full-path]", "full-path"),
-         {:ok, metadata} <- Metadata.read(filename, root_file_name) do
-      attrs = %{
-        filename: filename,
-        root_file_name: root_file_name,
-        title: Metadata.get_title(metadata),
-        author: Metadata.get_author(metadata)
-      }
+  def create_book(filename, metadata) when is_binary(filename) do
+    attrs = %{
+      filename: filename,
+      title: Metadata.get_title(metadata),
+      author: Metadata.get_author(metadata)
+    }
 
-      %Book{}
-      |> Book.changeset(attrs)
-      |> Repo.insert()
-    else
-      err -> err
-    end
+    %Book{}
+    |> Book.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """
@@ -117,5 +102,53 @@ defmodule Dogear.Books do
   """
   def change_book(%Book{} = book, attrs \\ %{}) do
     Book.changeset(book, attrs)
+  end
+
+  def read_metadata(filename) do
+    with {:ok, zip_handle} <- Zip.open(filename),
+         {:ok, root_file_name} <- Document.root_filename(zip_handle),
+         {:ok, root_document} <- Document.root_docuemnt(zip_handle, root_file_name) do
+      Metadata.read(root_document)
+    end
+  end
+
+  def load_virtual(%Book{} = book) do
+    book
+    |> load_zip_handle()
+    |> load_root_filename()
+    |> load_root_document()
+    |> load_spine()
+    |> load_manifest()
+    |> clear_root_document()
+  end
+
+  defp load_zip_handle(%Book{} = book) do
+    {:ok, zip_handle} = Zip.open(book.filename)
+    %Book{book | zip_handle: zip_handle}
+  end
+
+  defp load_root_filename(%Book{} = book) do
+    {:ok, root_file_name} = Document.root_filename(book.zip_handle)
+    %Book{book | root_file_name: root_file_name}
+  end
+
+  defp load_root_document(%Book{} = book) do
+    {:ok, root_document} = Document.root_docuemnt(book.zip_handle, book.root_file_name)
+    %Book{book | root_document: root_document}
+  end
+
+  defp load_spine(%Book{} = book) do
+    spine = Spines.create_spine(book.root_document)
+    %Book{book | spine: spine}
+  end
+
+  defp load_manifest(%Book{} = book)
+       when not is_nil(book.root_document) and not is_nil(book.root_file_name) do
+    manifest = Manifests.create_manifest(book.root_document, book.root_file_name)
+    %Book{book | manifest: manifest}
+  end
+
+  defp clear_root_document(%Book{} = book) do
+    %Book{book | root_document: nil}
   end
 end
