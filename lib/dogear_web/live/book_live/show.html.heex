@@ -1,7 +1,12 @@
 <div class="wrapper">
-  <header> <%= @book.title %> <a phx-click="previousPlace" href="#">Previous</a> <a phx-click="nextPlace" href="#">Next</a> </header>
+  <header>
+    <%= @book.title %> <a phx-click="previousPlace" href="#">Previous</a>
+    <a phx-click="nextPlace" href="#">Next</a>
+  </header>
   <div id="dog-ear-container" phx-hook="IntersectionObserver" class="content">
     <%= raw(@render) %>
   </div>
-  <footer> <a phx-click="previousPlace" href="#">Previous</a> <a phx-click="nextPlace" href="#">Next</a> </footer>
+  <footer>
+    <a phx-click="previousPlace" href="#">Previous</a> <a phx-click="nextPlace" href="#">Next</a>
+  </footer>
 </div>

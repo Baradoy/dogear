@@ -7,19 +7,19 @@
     id="book-form"
     phx-target={@myself}
     phx-change="validate"
-    phx-submit="save">
-  
-    <%= label f, :filename %>
-    <%= text_input f, :filename %>
-    <%= error_tag f, :filename %>
-  
-    <%= error_tag f, :title %>
+    phx-submit="save"
+  >
+    <%= label(f, :filename) %>
+    <%= text_input(f, :filename) %>
+    <%= error_tag(f, :filename) %>
 
-    <%= error_tag f, :author %>
-    <%= error_tag f, :root_file_name %>
-  
+    <%= error_tag(f, :title) %>
+
+    <%= error_tag(f, :author) %>
+    <%= error_tag(f, :root_file_name) %>
+
     <div>
-      <%= submit "Save", phx_disable_with: "Saving..." %>
+      <%= submit("Save", phx_disable_with: "Saving...") %>
     </div>
   </.form>
 </div>
