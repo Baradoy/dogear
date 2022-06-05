@@ -9,12 +9,12 @@ defmodule DogearWeb.BookLive.Show do
   alias Dogear.Books.Manifests
   alias Dogear.Books.Renderer
   alias Dogear.Books.Spines
-  alias Dogear.Zip
+  alias Dogear.Document
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
     book = Books.get_book!(id)
-    root_document = Zip.root_docuemnt!(book)
+    root_document = Document.root_docuemnt!(book)
     spine = Spines.create_spine(root_document)
     manifest = Manifests.create_manifest(root_document)
     bookmark = Bookmarks.get_or_create_bookmark_by_book(book, spine)
@@ -87,7 +87,7 @@ defmodule DogearWeb.BookLive.Show do
 
   defp assign_bookmark(socket, bookmark) do
     href = Manifests.get_href(socket.assigns.manifest, bookmark.idref)
-    href_document = Zip.href_docuemnt!(socket.assigns.book, href)
+    href_document = Document.href_docuemnt!(socket.assigns.book, href)
     render = Renderer.render(href_document)
 
     socket

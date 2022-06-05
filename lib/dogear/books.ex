@@ -8,7 +8,7 @@ defmodule Dogear.Books do
   alias Dogear.Schema.Book
   alias Dogear.Metadata
   alias Dogear.Repo
-  alias Dogear.Zip
+  alias Dogear.Document
 
   @doc """
   Returns the list of books.
@@ -51,12 +51,9 @@ defmodule Dogear.Books do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_book(%{"filename" => filename}) do
-    with {:ok, _mimetype} <- Zip.read(filename, "mimetype"),
-         {:ok, container} <- Zip.read(filename, "META-INF/container.xml"),
-         {:ok, container_document} <- Floki.parse_document(container),
-         [root_file_name] <- Floki.attribute(container_document, "[full-path]", "full-path"),
-         {:ok, metadata} <- Metadata.read(filename, root_file_name) do
+  def create_book(filename) do
+    with {:ok, root_file_name} <- Document.root_file_name(filename),
+         {:ok, metadata} <- Metadata.read(filename) do
       attrs = %{
         filename: filename,
         root_file_name: root_file_name,
@@ -105,6 +102,9 @@ defmodule Dogear.Books do
   def delete_book(%Book{} = book) do
     Repo.delete(book)
   end
+
+  @spec root_document_dir(Book.t()) :: String.t()
+  def root_document_dir(%Book{root_file_name: root_file_name}), do: Path.dirname(root_file_name)
 
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking book changes.

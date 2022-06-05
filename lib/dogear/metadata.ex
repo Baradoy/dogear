@@ -3,7 +3,7 @@ defmodule Dogear.Metadata do
   Reads Metadata from an epub
   """
 
-  alias Dogear.Zip
+  alias Dogear.Document
 
   @keys [
     :identifier,
@@ -43,11 +43,11 @@ defmodule Dogear.Metadata do
           type: [String.t()]
         }
 
-  @spec read(String.t(), String.t()) :: {:ok, t()} | {:error, any()}
-  def read(archive, root_file_name) do
-    case Zip.read(archive, root_file_name) do
+  @spec read(String.t()) :: {:ok, t()} | {:error, any()}
+  def read(archive) do
+    case Document.root_docuemnt(archive) do
       {:ok, root_file} -> parse_root_file(root_file)
-      {:error, _error} -> {:error, "Cannot find root document #{root_file_name}"}
+      {:error, _error} -> {:error, "Cannot find root document in #{archive}"}
     end
   end
 
@@ -56,6 +56,9 @@ defmodule Dogear.Metadata do
 
   @spec get_author(t()) :: String.t()
   def get_author(metadata), do: Enum.join(metadata.creator, " - ")
+
+  @spec make_filename(t()) :: String.t()
+  def make_filename(metadata), do: get_author(metadata) <> "-" <> get_title(metadata)
 
   defp parse_root_file(root_file) do
     case Floki.parse_document(root_file) do

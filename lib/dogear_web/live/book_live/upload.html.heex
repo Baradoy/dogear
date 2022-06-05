@@ -1,0 +1,41 @@
+
+
+
+<section phx-drop-target={@uploads.epub.ref}>
+  <%= for entry <- @uploads.epub.entries do %>
+    <article class="upload-entry">
+
+      <figure>
+        <figcaption><%= entry.client_name %></figcaption>
+      </figure>
+
+      <%# entry.progress will update automatically for in-flight entries %>
+      <progress value={entry.progress} max="100"> <%= entry.progress %>% </progress>
+
+      <%# a regular click event whose handler will invoke Phoenix.LiveView.cancel_upload/3 %>
+      <button phx-click="cancel-upload" phx-value-ref={entry.ref} aria-label="cancel">&times;</button>
+
+      <%# Phoenix.LiveView.Helpers.upload_errors/2 returns a list of error atoms %>
+      <%= for err <- upload_errors(@uploads.epub, entry) do %>
+        <p class="alert alert-danger"><%= error_to_string(err) %></p>
+      <% end %>
+
+    </article>
+  <% end %>
+</section>
+
+<form id="upload-form" phx-submit="save" phx-change="validate">
+  <%= live_file_input @uploads.epub %>
+  <button type="submit">Upload</button>
+</form>
+
+<section>
+  <%= for upload <- @uploaded_files do %>
+    <%= inspect(upload) %>
+  <% end %>
+</section>
+
+<%# Phoenix.LiveView.Helpers.upload_errors/1 returns a list of error atoms %>
+<%= for err <- upload_errors(@uploads.epub) do %>
+  <p class="alert alert-danger"><%= error_to_string(err) %></p>
+<% end %>

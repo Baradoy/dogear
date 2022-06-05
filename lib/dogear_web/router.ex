@@ -21,7 +21,7 @@ defmodule DogearWeb.Router do
     live "/", BookmarkLive.Index, :index
 
     live "/books", BookLive.Index, :index
-    live "/books/new", BookLive.Index, :new
+    live "/books/new", BookLive.Upload, :new
     live "/books/:id/edit", BookLive.Index, :edit
 
     live "/books/:id", BookLive.Show, :show

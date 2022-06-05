@@ -6,6 +6,8 @@ defmodule Dogear.Schema.Book do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Dogear.Schema.Bookmark
+
   @type t :: %__MODULE__{
           author: String.t(),
           filename: String.t(),
@@ -18,6 +20,8 @@ defmodule Dogear.Schema.Book do
     field :filename, :string
     field :root_file_name, :string
     field :title, :string
+
+    has_many :bookmars, Bookmark, on_delete: :delete_all
 
     timestamps()
   end
