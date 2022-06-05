@@ -33,8 +33,7 @@
         <td><%= book.root_file_name %></td>
 
         <td>
-          <span><%= link "Read", to: "#", phx_click: "read", phx_value_id: book.id %></span>
-          <span><%= live_redirect "Show", to: Routes.book_show_path(@socket, :show, book) %></span>
+          <span><%= live_redirect "Read", to: Routes.book_show_path(@socket, :show, book) %></span>
           <span><%= live_patch "Edit", to: Routes.book_index_path(@socket, :edit, book) %></span>
           <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: book.id, data: [confirm: "Are you sure?"] %></span>
         </td>

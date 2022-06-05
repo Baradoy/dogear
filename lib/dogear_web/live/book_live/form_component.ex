@@ -43,17 +43,4 @@ defmodule DogearWeb.BookLive.FormComponent do
         {:noreply, assign(socket, :changeset, changeset)}
     end
   end
-
-  defp save_book(socket, :new, book_params) do
-    case Books.create_book(book_params) do
-      {:ok, _book} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Book created successfully")
-         |> push_redirect(to: socket.assigns.return_to)}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, changeset: changeset)}
-    end
-  end
 end

@@ -27,11 +27,11 @@ defmodule DogearWeb.BookLive.Upload do
   def handle_event("save", _params, socket) do
     uploaded_files =
       consume_uploaded_entries(socket, :epub, fn %{path: path}, _entry ->
-        with {:ok, metadata} <- Metadata.read(path),
+        with {:ok, metadata} <- Books.read_metadata(path),
              filename <- Metadata.make_filename(metadata) <> ".epub",
              dest <- Path.join([:code.priv_dir(:dogear), "static", "uploads", filename]),
              :ok <- File.cp(path, dest) do
-          Books.create_book("priv/static/uploads/" <> filename)
+          Books.create_book("priv/static/uploads/" <> filename, metadata)
         end
       end)
 

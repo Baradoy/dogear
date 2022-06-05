@@ -30,8 +30,33 @@
 </form>
 
 <section>
-  <%= for upload <- @uploaded_files do %>
-    <%= inspect(upload) %>
+  <%= if length(@uploaded_files) > 0 do %>
+    <table>
+      <thead>
+        <tr>
+          <th>Filename</th>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Root file name</th>
+
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="books">
+        <%= for book <- @uploaded_files do %>
+          <tr id={"book-#{book.id}"}>
+            <td><%= book.filename %></td>
+            <td><%= book.title %></td>
+            <td><%= book.author %></td>
+            <td><%= book.root_file_name %></td>
+
+            <td>
+              <span><%= live_redirect "Read", to: Routes.book_show_path(@socket, :show, book) %></span>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
   <% end %>
 </section>
 
