@@ -1,5 +1,9 @@
 # Dogear
 
+Dogear is a browser based personal Epub reader.
+
+Your reading session can be resumed quickly from any browser.
+
 ## Auth
 
 Currently DogEar works with a single user. You can setup the username and password for the user by setting `AUTH_USERNAME` and `AUTH_PASSWORD` environment variables. Create `.envrc.private` with the environment variable you wish to override in `.envrc` and run `direnv allow`.
