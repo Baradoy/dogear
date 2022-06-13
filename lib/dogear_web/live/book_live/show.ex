@@ -4,6 +4,8 @@ defmodule DogearWeb.BookLive.Show do
   """
   use DogearWeb, :live_view
 
+  require Logger
+
   alias Dogear.Bookmarks
   alias Dogear.Books
   alias Dogear.Books.Manifests

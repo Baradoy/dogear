@@ -5,6 +5,8 @@ defmodule Dogear.Books do
 
   import Ecto.Query, warn: false
 
+  require Logger
+
   alias Dogear.Books.Manifests
   alias Dogear.Books.Spines
   alias Dogear.Schema.Book
@@ -113,6 +115,7 @@ defmodule Dogear.Books do
   end
 
   def load_virtual(%Book{} = book) do
+    Logger.warn("Book: #{inspect(book)}")
     book
     |> load_zip_handle()
     |> load_root_filename()
