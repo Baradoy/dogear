@@ -18,8 +18,8 @@ processes = []
   auto_rollback = true
 
 [mounts]
-  source="sqlite"
-  destination="/data"
+source="dogear"
+destination="/app/priv/"
 
 [[services]]
   http_checks = []

@@ -4,8 +4,11 @@ defmodule DogearWeb.BookLive.Upload do
   """
   use DogearWeb, :live_view
 
+  require Logger
+
   alias Dogear.Books
   alias Dogear.Metadata
+
 
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
@@ -27,10 +30,12 @@ defmodule DogearWeb.BookLive.Upload do
   def handle_event("save", _params, socket) do
     uploaded_files =
       consume_uploaded_entries(socket, :epub, fn %{path: path}, _entry ->
+        Logger.warn("Upload path:#{path}")
         with {:ok, metadata} <- Books.read_metadata(path),
              filename <- Metadata.make_filename(metadata) <> ".epub",
-             dest <- Path.join([:code.priv_dir(:dogear), "static", "uploads", filename]),
-             :ok <- File.cp(path, dest) do
+             dest <- Path.join([:code.priv_dir(:dogear), "static", "uploads", filename]) |> IO.inspect(label: :dest),
+             :ok <- Logger.warn("Dest path:#{dest}"),
+             :ok <- File.cp(path, dest) |> IO.inspect(label: :copy) do
           Books.create_book("priv/static/uploads/" <> filename, metadata)
         end
       end)

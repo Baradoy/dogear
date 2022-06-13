@@ -55,8 +55,8 @@ defmodule DogearWeb.Router do
       username = System.fetch_env!("AUTH_USERNAME")
       password = System.fetch_env!("AUTH_PASSWORD")
       Plug.BasicAuth.basic_auth(conn, username: username, password: password)
+    else
+      conn
     end
-
-    conn
   end
 end
