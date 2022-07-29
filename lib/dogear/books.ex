@@ -15,6 +15,8 @@ defmodule Dogear.Books do
   alias Dogear.Document
   alias Dogear.Zip
 
+  @uploads_path Application.compile_env(:dogear, :uploads_path)
+
   @doc """
   Returns the list of books.
 
@@ -116,6 +118,7 @@ defmodule Dogear.Books do
 
   def load_virtual(%Book{} = book) do
     Logger.warn("Book: #{inspect(book)}")
+
     book
     |> load_zip_handle()
     |> load_root_filename()
@@ -126,7 +129,8 @@ defmodule Dogear.Books do
   end
 
   defp load_zip_handle(%Book{} = book) do
-    {:ok, zip_handle} = Zip.open(book.filename)
+    path = Path.join([@uploads_path, book.filename])
+    {:ok, zip_handle} = Zip.open(path)
     %Book{book | zip_handle: zip_handle}
   end
 

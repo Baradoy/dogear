@@ -12,6 +12,8 @@ config :dogear, :environment, Mix.env()
 config :dogear,
   ecto_repos: [Dogear.Repo]
 
+config :dogear, uploads_path: "/app/priv/uploads/"
+
 # Configures the endpoint
 config :dogear, DogearWeb.Endpoint,
   url: [host: "localhost"],

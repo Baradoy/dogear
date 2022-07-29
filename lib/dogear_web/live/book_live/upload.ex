@@ -9,6 +9,7 @@ defmodule DogearWeb.BookLive.Upload do
   alias Dogear.Books
   alias Dogear.Metadata
 
+  @uploads_path Application.compile_env(:dogear, :uploads_path)
 
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
@@ -30,17 +31,29 @@ defmodule DogearWeb.BookLive.Upload do
   def handle_event("save", _params, socket) do
     uploaded_files =
       consume_uploaded_entries(socket, :epub, fn %{path: path}, _entry ->
-        Logger.warn("Upload path:#{path}")
         with {:ok, metadata} <- Books.read_metadata(path),
-             filename <- Metadata.make_filename(metadata) <> ".epub",
-             dest <- Path.join([:code.priv_dir(:dogear), "static", "uploads", filename]) |> IO.inspect(label: :dest),
-             :ok <- Logger.warn("Dest path:#{dest}"),
-             :ok <- File.cp(path, dest) |> IO.inspect(label: :copy) do
-          Books.create_book("priv/static/uploads/" <> filename, metadata)
+             :ok <- ensure_destination_path(),
+             {:ok, filename} <- copy_file(path, metadata) do
+          Books.create_book(filename, metadata)
         end
       end)
 
     {:noreply, update(socket, :uploaded_files, &(&1 ++ uploaded_files))}
+  end
+
+  defp ensure_destination_path() do
+    File.mkdir_p(@uploads_path)
+  end
+
+  defp copy_file(path, metadata) do
+    filename = Metadata.make_filename(metadata) <> ".epub"
+    dest = Path.join([@uploads_path, filename])
+    Logger.warn("Copy from #{path} to #{dest}")
+
+    case File.cp(path, dest) do
+      :ok -> {:ok, filename}
+      error -> error
+    end
   end
 
   defp error_to_string(err), do: inspect(err)
