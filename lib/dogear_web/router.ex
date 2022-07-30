@@ -51,12 +51,14 @@ defmodule DogearWeb.Router do
   end
 
   defp auth(conn, _opts) do
-    if !(Application.get_env(:dogear, :environment) in [:dev, :test]) do
-      username = System.fetch_env!("AUTH_USERNAME")
-      password = System.fetch_env!("AUTH_PASSWORD")
-      Plug.BasicAuth.basic_auth(conn, username: username, password: password)
-    else
-      conn
+    case Application.get_env(:dogear, :environment) do
+      env when env not in [:dev, :test] ->
+        username = System.fetch_env!("AUTH_USERNAME")
+        password = System.fetch_env!("AUTH_PASSWORD")
+        Plug.BasicAuth.basic_auth(conn, username: username, password: password)
+
+      _env ->
+        conn
     end
   end
 end
