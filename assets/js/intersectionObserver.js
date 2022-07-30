@@ -19,9 +19,10 @@ const observerHandler = (inViewMap, currentAnchor, pushAnchor) => (entries) => {
     );
 
   // Find the highest up element (measure from the bottom of the element)
-  const topAnchor = Array.from(inViewMap).reduceRight((acc, anchor) => {
+  const anchorList = Array.from(inViewMap)
+  const defaultAnchor = anchorList.pop()
+  const topAnchor = anchorList.reduce((acc, anchor) => {
     if (
-      !acc ||
       anchor[1] < acc[1] ||
       (anchor[1] == acc[1] && anchor[0] < acc[0])
     ) {
@@ -29,7 +30,7 @@ const observerHandler = (inViewMap, currentAnchor, pushAnchor) => (entries) => {
     } else {
       return acc;
     }
-  });
+  }, defaultAnchor);
 
   if (topAnchor[0] != currentAnchor) {
     currentAnchor = topAnchor[0];
@@ -66,7 +67,7 @@ const intersectionObserver = {
   mounted() {
     this.handleEvent("scrollTo", ({ anchorId }) => {
       scrollingTo = anchorId;
-      document.getElementById(anchorId).scrollIntoView({ behavior: "smooth" });
+      document.getElementById(anchorId)?.scrollIntoView({ behavior: "smooth" });
       clearTimeout(scrollingToTimer);
       scrollingToTimer =
         anchorId &&
