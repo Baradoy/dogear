@@ -54,17 +54,16 @@ defmodule Dogear.Bookmarks do
   """
   def list_bookmarks(query_opts \\ []) do
     Bookmark
-    |> query(query_opts)
+    |> compose_query(query_opts)
     |> Repo.all()
   end
 
-  def query(queryable, []), do: queryable
-
-  def query(queryable, [{:order_by, order_by} | tail]) do
-    queryable
-    |> Query.order_by(^order_by)
-    |> query(tail)
+  def compose_query(queryable, query_opts) do
+    Enum.reduce(query_opts, queryable, fn query_opt, acc -> query(acc, query_opt) end)
   end
+
+  def query(queryable, {:order_by, order_by}), do:
+    Query.order_by(queryable, ^order_by)
 
   @doc """
   Gets a single bookmark.
