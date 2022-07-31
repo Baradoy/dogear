@@ -20,9 +20,7 @@ defmodule Dogear.Books.Manifests do
 
   @spec get_id(Manifest.t(), String.t()) :: String.t()
   def get_id(%Manifest{} = manifest, href) do
-    %Item{id: id} =
-      manifest.items
-      |> Enum.find(fn %_{href: manifest_href} -> manifest_href == href end)
+    %Item{id: id} = get_item_by_href(%Manifest{} = manifest, href)
 
     id
   end
@@ -35,5 +33,16 @@ defmodule Dogear.Books.Manifests do
       |> Map.fetch!(:href)
 
     manifest.root_path |> Path.join(href) |> Path.relative_to(".")
+  end
+
+  @spec get_item_by_href(Manifest.t(), String.t()) :: Item.t()
+  def get_item_by_href(%Manifest{} = manifest, href) do
+    Enum.find(manifest.items, fn %Item{href: manifest_href} -> manifest_href == href end)
+  end
+
+  @spec get_item_by_idref(Manifest.t(), String.t()) :: Item.t()
+  def get_item_by_idref(%Manifest{} = manifest, id) do
+    manifest.items
+    |> Enum.find(fn %_{id: manifest_id} -> manifest_id == id end)
   end
 end

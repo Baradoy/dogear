@@ -13,7 +13,7 @@ defmodule DogearWeb.BookmarkLive.Index do
       {:ok, bookmark} ->
         socket =
           socket
-          |> redirect(to: Routes.book_show_path(socket, :show, bookmark.book_id))
+          |> redirect(to: Routes.book_show_path(socket, :show, bookmark.book_id, []))
 
         {:ok, socket}
 

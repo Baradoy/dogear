@@ -14,14 +14,20 @@ defmodule DogearWeb.BookLive.Show do
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
-    book = Books.get_book!(id)
-    bookmark = Bookmarks.get_or_create_bookmark_by_book(book)
+    socket =
+      socket
+      |> assign_new(:book, fn -> Books.get_book!(id) end)
+      |> assign_new(:bookmark, fn %{book: book} ->
+        Bookmarks.get_or_create_bookmark_by_book(book)
+      end)
+      |> assign(:manifest_item, fn %{book: book, bookmark: bookmark} ->
+        Manifests.get_item_by_idref(book.manifest, bookmark.idref)
+      end)
 
     socket =
       socket
-      |> assign(:book, book)
-      |> assign(:page_title, book.title)
-      |> assign_bookmark(bookmark)
+      |> assign(:page_title, socket.assigns.book.title)
+      |> assign_render()
       |> push_scroll()
       |> subscribe()
 
@@ -33,7 +39,13 @@ defmodule DogearWeb.BookLive.Show do
     {:ok, bookmark} =
       Bookmarks.navigate_bookmark(socket.assigns.book.spine, socket.assigns.bookmark, +1)
 
-    socket = assign_bookmark(socket, bookmark)
+    manifets_item = Manifests.get_item_by_idref(socket.assigns.book.manifest, bookmark.idref)
+
+    socket =
+      socket
+      |> assign(:bookmark, bookmark)
+      |> assign(:manifets_item, manifets_item)
+      |> assign_render()
 
     Phoenix.PubSub.broadcast(Dogear.PubSub, topic(socket), {"updateIdref", bookmark, self()})
 
@@ -44,7 +56,13 @@ defmodule DogearWeb.BookLive.Show do
     {:ok, bookmark} =
       Bookmarks.navigate_bookmark(socket.assigns.book.spine, socket.assigns.bookmark, -1)
 
-    socket = assign_bookmark(socket, bookmark)
+    manifets_item = Manifests.get_item_by_idref(socket.assigns.book.manifest, bookmark.idref)
+
+    socket =
+      socket
+      |> assign(:bookmark, bookmark)
+      |> assign(:manifets_item, manifets_item)
+      |> assign_render()
 
     Phoenix.PubSub.broadcast(Dogear.PubSub, topic(socket), {"updateIdref", bookmark, self()})
 
@@ -73,7 +91,11 @@ defmodule DogearWeb.BookLive.Show do
   end
 
   def handle_info({"updateIdref", bookmark, pid}, socket) when pid != self() do
-    socket = assign_bookmark(socket, bookmark)
+    socket =
+      socket
+      |> assign(:bookmark, bookmark)
+      |> assign_render()
+
     {:noreply, socket}
   end
 
@@ -81,8 +103,9 @@ defmodule DogearWeb.BookLive.Show do
     {:noreply, socket}
   end
 
-  defp assign_bookmark(socket, bookmark) do
-    book = socket.assigns.book
+  defp assign_render(socket) do
+    %{book: book, bookmark: bookmark} = socket.assigns
+
     href = Manifests.get_href(book.manifest, bookmark.idref)
     {:ok, href_document} = Document.href_docuemnt(book.zip_handle, href)
     render = Renderer.render(href_document)

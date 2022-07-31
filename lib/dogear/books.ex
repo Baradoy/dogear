@@ -46,6 +46,16 @@ defmodule Dogear.Books do
   """
   def get_book!(id), do: Book |> Repo.get!(id) |> load_virtual()
 
+  def fetch_book(id) do
+    case Repo.get(Book, id) do
+      %Book{} = book ->
+        {:ok, load_virtual(book)}
+
+      nil ->
+        {:error, %{message: "Book not found", source: :books, code: :e404}}
+    end
+  end
+
   @doc """
   Creates a book.
   """
@@ -117,8 +127,6 @@ defmodule Dogear.Books do
   end
 
   def load_virtual(%Book{} = book) do
-    Logger.warn("Book: #{inspect(book)}")
-
     book
     |> load_zip_handle()
     |> load_root_filename()
