@@ -4,6 +4,7 @@ defmodule Dogear.Bookmarks do
   """
 
   import Ecto.Query, warn: false
+  alias Ecto.Query
   alias Dogear.Repo
 
   alias Dogear.Books.Spines
@@ -12,7 +13,7 @@ defmodule Dogear.Bookmarks do
   alias Dogear.Schema.Bookmark
 
   def get_latest_bookmark() do
-    case list_bookmarks() do
+    case list_bookmarks(order_by: [desc: :updated_at]) do
       [head | _] -> {:ok, head}
       [] -> {:error, "No bookmark"}
     end
@@ -51,8 +52,18 @@ defmodule Dogear.Bookmarks do
       [%Bookmark{}, ...]
 
   """
-  def list_bookmarks do
-    Repo.all(Bookmark)
+  def list_bookmarks(query_opts \\ []) do
+    Bookmark
+    |> query(query_opts)
+    |> Repo.all()
+  end
+
+  def query(queryable, []), do: queryable
+
+  def query(queryable, [{:order_by, order_by} | tail]) do
+    queryable
+    |> Query.order_by(^order_by)
+    |> query(tail)
   end
 
   @doc """
