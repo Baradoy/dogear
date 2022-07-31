@@ -1,4 +1,7 @@
 defmodule DogearWeb.Plug.ManifestAssigns do
+  @moduledoc """
+  Put Manifest Items from the path and bookmark into the assigns.
+  """
   import Plug.Conn
 
   alias Dogear.Books.Manifests

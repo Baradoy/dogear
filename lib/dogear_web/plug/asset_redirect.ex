@@ -44,7 +44,7 @@ defmodule DogearWeb.Plug.AssetRedirect do
   def raw_asset_response(conn) do
     with %{"href" => [_ | _] = href_glob} <- conn.path_params,
          path <- Path.join(href_glob) |> Path.relative_to("."),
-         {:ok, binary} = Zip.file(conn.assigns.book.zip_handle, path) do
+         {:ok, binary} <- Zip.file(conn.assigns.book.zip_handle, path) do
       opts = [
         content_type: conn.assigns.path_manifest_item.media_type,
         disposition: :inline,
