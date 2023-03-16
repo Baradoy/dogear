@@ -38,3 +38,6 @@ npm-debug.log
 
 # upload Files
 priv/uploads
+
+# ignore epub files
+*.epub

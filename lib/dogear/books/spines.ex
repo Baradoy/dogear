@@ -13,6 +13,7 @@ defmodule Dogear.Books.Spines do
   end
 
   def get_idref(%Spine{idrefs: idrefs}, index) do
+    index = rem(index, length(idrefs))
     Enum.fetch!(idrefs, index)
   end
 

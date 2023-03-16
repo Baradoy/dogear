@@ -28,6 +28,8 @@ defmodule DogearWeb.ConnCase do
 
       # The default endpoint for testing
       @endpoint DogearWeb.Endpoint
+
+      use DogearWeb, :verified_routes
     end
   end
 

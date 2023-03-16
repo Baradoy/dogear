@@ -1,7 +1,8 @@
 defmodule DogearWeb.LiveHelpers do
   @moduledoc false
 
-  import Phoenix.LiveView
+  use Phoenix.Component
+
   import Phoenix.LiveView.Helpers
 
   alias Phoenix.LiveView.JS
@@ -25,9 +26,10 @@ defmodule DogearWeb.LiveHelpers do
         />
       </.modal>
   """
-  def modal(assigns) do
-    assigns = assign_new(assigns, :return_to, fn -> nil end)
+  attr :return_to, :string, default: nil
+  slot :inner_block
 
+  def modal(assigns) do
     ~H"""
     <div id="modal" class="phx-modal fade-in" phx-remove={hide_modal()}>
       <div
