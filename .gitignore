@@ -41,3 +41,6 @@ priv/uploads
 
 # ignore epub files
 *.epub
+
+# Ignore Dialyzer files
+priv/plts/

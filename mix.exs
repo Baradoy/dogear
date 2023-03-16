@@ -10,7 +10,15 @@ defmodule Dogear.MixProject do
       compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      dialyzer: [
+        plt_add_apps: [:ex_unit, :mix],
+        list_unused_filters: true,
+        plt_file: {:no_warn, "priv/plts/dialyzer-#{Mix.env()}.plt"}
+      ],
+      preferred_cli_env: [
+        check: :test
+      ]
     ]
   end
 
@@ -50,7 +58,7 @@ defmodule Dogear.MixProject do
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
       {:credo, "~> 1.6.0", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.1.0", only: [:dev], runtime: false}
+      {:dialyxir, "~> 1.1.0", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -66,7 +74,14 @@ defmodule Dogear.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      "assets.deploy": ["esbuild default --minify", "phx.digest"]
+      "assets.deploy": ["esbuild default --minify", "phx.digest"],
+      check: [
+        "compile --warnings-as-errors",
+        "format --check-formatted",
+        "test",
+        "dialyzer",
+        "credo"
+      ]
     ]
   end
 end
