@@ -4,15 +4,17 @@ defmodule Dogear.Bookmarks do
   """
 
   import Ecto.Query, warn: false
+  alias Ecto.Query
   alias Dogear.Repo
 
   alias Dogear.Books.Spines
   alias Dogear.Books.Spines.Spine
+  alias Dogear.Books.Manifests.Item
   alias Dogear.Schema.Book
   alias Dogear.Schema.Bookmark
 
   def get_latest_bookmark() do
-    case list_bookmarks() do
+    case list_bookmarks(order_by: [desc: :updated_at]) do
       [head | _] -> {:ok, head}
       [] -> {:error, "No bookmark"}
     end
@@ -34,12 +36,19 @@ defmodule Dogear.Bookmarks do
     end
   end
 
-  def navigate_bookmark(%Spine{} = spine, %Bookmark{} = bookmark, offset) do
+  def navigate_bookmark(%Spine{} = spine, %Bookmark{} = bookmark, offset)
+      when is_integer(offset) do
     index = bookmark.spine_index + offset
 
     idref = Spines.get_idref(spine, index)
 
     update_bookmark(bookmark, %{anchor_id: "#", idref: idref, spine_index: index})
+  end
+
+  def navigate_bookmark(%Spine{} = spine, %Bookmark{} = bookmark, %Item{} = manifest_item) do
+    index = Spines.get_index(spine, manifest_item.id)
+
+    update_bookmark(bookmark, %{anchor_id: "#", idref: manifest_item.id, spine_index: index})
   end
 
   @doc """
@@ -51,9 +60,17 @@ defmodule Dogear.Bookmarks do
       [%Bookmark{}, ...]
 
   """
-  def list_bookmarks do
-    Repo.all(Bookmark)
+  def list_bookmarks(query_opts \\ []) do
+    Bookmark
+    |> compose_query(query_opts)
+    |> Repo.all()
   end
+
+  def compose_query(queryable, query_opts) do
+    Enum.reduce(query_opts, queryable, fn query_opt, acc -> query(acc, query_opt) end)
+  end
+
+  def query(queryable, {:order_by, order_by}), do: Query.order_by(queryable, ^order_by)
 
   @doc """
   Gets a single bookmark.

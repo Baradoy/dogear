@@ -1,5 +1,10 @@
 defmodule DogearWeb.Router do
   use DogearWeb, :router
+  require Plug.Router
+
+  alias DogearWeb.Plug.AssetAssigns
+  alias DogearWeb.Plug.ManifestAssigns
+  alias DogearWeb.Plug.AssetRedirect
 
   pipeline :browser do
     plug :auth
@@ -15,6 +20,12 @@ defmodule DogearWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :assets do
+    plug AssetAssigns
+    plug ManifestAssigns
+    plug AssetRedirect
+  end
+
   scope "/", DogearWeb do
     pipe_through :browser
 
@@ -23,9 +34,14 @@ defmodule DogearWeb.Router do
     live "/books", BookLive.Index, :index
     live "/books/new", BookLive.Upload, :new
     live "/books/:id/edit", BookLive.Index, :edit
-
-    live "/books/:id", BookLive.Show, :show
     live "/books/:id/show/edit", BookLive.Show, :edit
+
+    scope "/books/:id" do
+      pipe_through :assets
+
+      # live "/read/", BookLive.Show, :show
+      live "/read/*href", BookLive.Show, :show
+    end
   end
 
   # Other scopes may use custom stacks.

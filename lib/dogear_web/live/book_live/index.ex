@@ -39,7 +39,7 @@ defmodule DogearWeb.BookLive.Index do
   def handle_event("read", %{"id" => id}, socket) do
     book = Books.get_book!(id)
 
-    {:noreply, push_redirect(socket, to: Routes.book_show_path(socket, :show, book))}
+    {:noreply, push_redirect(socket, to: Routes.book_show_path(socket, :show, book, []))}
   end
 
   def handle_event("delete", %{"id" => id}, socket) do
