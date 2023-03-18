@@ -1,4 +1,4 @@
-defmodule DogearWeb.Plug.AssetAssigns do
+defmodule DogearWeb.Plug.AssignBook do
   @moduledoc """
   Loads the book from the id on the path and puts it into conn.assigns.
 

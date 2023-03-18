@@ -2,9 +2,9 @@ defmodule DogearWeb.Router do
   use DogearWeb, :router
   require Plug.Router
 
-  alias DogearWeb.Plug.AssetAssigns
-  alias DogearWeb.Plug.ManifestAssigns
-  alias DogearWeb.Plug.AssetRedirect
+  alias DogearWeb.Plug.AssignBook
+  alias DogearWeb.Plug.AssignManifest
+  alias DogearWeb.Plug.RenderAssets
 
   pipeline :browser do
     plug :auth
@@ -21,9 +21,9 @@ defmodule DogearWeb.Router do
   end
 
   pipeline :assets do
-    plug AssetAssigns
-    plug ManifestAssigns
-    plug AssetRedirect
+    plug AssignBook
+    plug AssignManifest
+    plug RenderAssets
   end
 
   scope "/", DogearWeb do

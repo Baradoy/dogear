@@ -1,4 +1,4 @@
-defmodule DogearWeb.Plug.ManifestAssigns do
+defmodule DogearWeb.Plug.AssignManifest do
   @moduledoc """
   Put Manifest Items from the path and bookmark into the assigns.
   """

@@ -1,4 +1,4 @@
-defmodule DogearWeb.Plug.AssetRedirect do
+defmodule DogearWeb.Plug.RenderAssets do
   @moduledoc """
   Matches the manifest href from the bookmark to the URL
   This allows links and references rom inside the book.
@@ -73,6 +73,7 @@ defmodule DogearWeb.Plug.AssetRedirect do
   def redirect_to_manifest_item_href(conn) do
     path_for_glob =
       manifest_path_glob(conn.assigns.book.manifest, conn.assigns.manifest_item.href)
+
     Logger.info("Redirection to #{inspect(path_for_glob)}")
 
     Phoenix.Controller.redirect(conn,
