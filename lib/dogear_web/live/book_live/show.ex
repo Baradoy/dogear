@@ -24,14 +24,32 @@ defmodule DogearWeb.BookLive.Show do
         Manifests.get_item_by_idref(book.manifest, bookmark.idref)
       end)
 
-    socket =
-      socket
-      |> assign(:page_title, socket.assigns.book.title)
-      |> assign_render()
-      |> push_scroll()
-      |> subscribe()
+    # socket =
+    #   socket
+    #   |> assign(:page_title, socket.assigns.book.title)
+    #   |> assign_render()
+    #   |> push_scroll()
+    #   |> subscribe()
 
     {:ok, socket}
+  end
+
+  @impl true
+  def handle_params(unsigned_params, _uri, socket) do
+    case unsigned_params["href"] do
+      [] ->
+        socket =
+          socket
+          |> assign(:page_title, socket.assigns.book.title)
+          |> assign_render()
+          |> push_scroll()
+          |> subscribe()
+
+        {:noreply, socket}
+
+      href when is_list(href) ->
+        {:noreply, push_patch(socket, to: ~p"/books/#{socket.assigns.book}/read/")}
+    end
   end
 
   @impl true

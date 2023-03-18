@@ -10,45 +10,34 @@ defmodule DogearWeb.Plug.RenderAssets do
 
   alias Dogear.Zip
 
-  alias DogearWeb.Router.Helpers, as: Routes
-
   def init(opts \\ %{}), do: opts
 
   def call(conn, _opts) do
     case conn.assigns.path_manifest_item do
       %{media_type: "application/xhtml+xml"} = item ->
-        Logger.info("Matching path for #{inspect(item)}")
-        conn |> match_path()
+        Logger.info("Continuing for #{inspect(item)}")
+        conn
 
       %{media_type: _media_type} = item ->
         Logger.info("Sending raw asset for #{inspect(item)}")
         conn |> raw_asset_response()
 
       nil ->
-        conn |> redirect_to_manifest_item_href()
-    end
-  end
-
-  def match_path(conn) do
-    %{id: manifest_item_id, href: _manifest_item_href} = conn.assigns.manifest_item
-
-    case conn.assigns.path_manifest_item do
-      %{id: ^manifest_item_id} ->
+        Logger.warn("No item found")
         conn
-
-      %{id: _idref} ->
-        conn |> redirect_to_manifest_item_href()
     end
   end
 
   def raw_asset_response(conn) do
-    with %{"href" => [_ | _] = href_glob} <- conn.path_params,
-         path <- Path.join(href_glob) |> Path.relative_to("."),
-         {:ok, binary} <- Zip.file(conn.assigns.book.zip_handle, path) do
+    href = conn.assigns.path_manifest_item.href
+    manifest = conn.assigns.book.manifest
+    full_path = Path.join(manifest.root_path,href)
+
+    with  {:ok, binary} <- Zip.file(conn.assigns.book.zip_handle, full_path) do
       opts = [
         content_type: conn.assigns.path_manifest_item.media_type,
         disposition: :inline,
-        filename: path
+        filename: href
       ]
 
       conn
@@ -64,20 +53,5 @@ defmodule DogearWeb.Plug.RenderAssets do
         |> Phoenix.Controller.render(:"404")
         |> halt()
     end
-  end
-
-  defp manifest_path_glob(manifest, href) do
-    Path.join(manifest.root_path, href) |> Path.relative_to(".") |> String.split("/")
-  end
-
-  def redirect_to_manifest_item_href(conn) do
-    path_for_glob =
-      manifest_path_glob(conn.assigns.book.manifest, conn.assigns.manifest_item.href)
-
-    Logger.info("Redirection to #{inspect(path_for_glob)}")
-
-    Phoenix.Controller.redirect(conn,
-      to: Routes.book_show_path(conn, :show, conn.assigns.book, path_for_glob)
-    )
   end
 end
