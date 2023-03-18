@@ -8,9 +8,7 @@ defmodule DogearWeb.Plug.AssetAssigns do
   import Plug.Conn
 
   alias Dogear.Books
-  alias Dogear.Books.Manifests.Item
   alias Dogear.Bookmarks
-  alias Dogear.Books.Manifests
 
   alias Dogear.Schema.Bookmark
   alias Dogear.Schema.Bookmark
@@ -27,7 +25,9 @@ defmodule DogearWeb.Plug.AssetAssigns do
     else
       {:error, %{code: :e404}} ->
         conn
-        |> Phoenix.Controller.render(MyApp.Web.ErrorView, :"404")
+        |> put_status(:not_found)
+        |> Phoenix.Controller.put_view(json: DogearWeb.ErrorView)
+        |> Phoenix.Controller.render(:"404")
         |> halt()
     end
   end

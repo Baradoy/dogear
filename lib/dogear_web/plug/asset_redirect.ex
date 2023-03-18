@@ -30,7 +30,7 @@ defmodule DogearWeb.Plug.AssetRedirect do
   end
 
   def match_path(conn) do
-    %{id: manifest_item_id, href: manifest_item_href} = conn.assigns.manifest_item
+    %{id: manifest_item_id, href: _manifest_item_href} = conn.assigns.manifest_item
 
     case conn.assigns.path_manifest_item do
       %{id: ^manifest_item_id} ->
@@ -59,7 +59,9 @@ defmodule DogearWeb.Plug.AssetRedirect do
         Logger.warn("assert_response failed error:#{inspect(error)}")
 
         conn
-        |> Phoenix.Controller.render(MyApp.Web.ErrorView, :"404")
+        |> put_status(:not_found)
+        |> Phoenix.Controller.put_view(json: DogearWeb.ErrorView)
+        |> Phoenix.Controller.render(:"404")
         |> halt()
     end
   end
@@ -71,6 +73,7 @@ defmodule DogearWeb.Plug.AssetRedirect do
   def redirect_to_manifest_item_href(conn) do
     path_for_glob =
       manifest_path_glob(conn.assigns.book.manifest, conn.assigns.manifest_item.href)
+    Logger.info("Redirection to #{inspect(path_for_glob)}")
 
     Phoenix.Controller.redirect(conn,
       to: Routes.book_show_path(conn, :show, conn.assigns.book, path_for_glob)
