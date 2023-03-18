@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.13.4]
-        otp: [25.0]
+        elixir: [1.14.3]
+        otp: [25.3]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -23,14 +23,38 @@ jobs:
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
-      - name: Cache Elixir dependencies
-        uses: actions/cache@v2
+      - name: Cache deps
+        id: cache-deps
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-elixir-deps
         with:
-          path: |
-            deps
-            _build
-            priv/plts
-          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
+          path: deps
+          key: ${{ runner.os }}-mix-${{ env.cache-name }}-${{matrix.otp}}-${{matrix.elixir}}-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ env.cache-name }}-${{matrix.otp}}-${{matrix.elixir}}-
+      - name: Cache compiled build
+        id: cache-build
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-compiled-build
+        with:
+          path: _build
+          key: ${{ runner.os }}-mix-${{ env.cache-name }}-${{matrix.otp}}-${{matrix.elixir}}-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ env.cache-name }}-${{matrix.otp}}-${{matrix.elixir}}-
+            ${{ runner.os }}-mix-${{ env.cache-name }}-
+      - name: Cache plts
+        id: cache-plts
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-dializer-plts
+        with:
+          path: priv/plts
+          key: ${{ runner.os }}-mix-${{ env.cache-name }}-${{matrix.otp}}-${{matrix.elixir}}-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ env.cache-name }}-${{matrix.otp}}-${{matrix.elixir}}-
+            ${{ runner.os }}-mix-${{ env.cache-name }}-
       - name: Install dependencies
         run: mix deps.get && mix deps.unlock --check-unused
       - name: Compile
@@ -42,6 +66,6 @@ jobs:
       - name: Run Tests
         run: mix test
       - name: Dialyzer
-        run: mix dialyzer --halt-exit-status
+        run: mix dialyzer --format github
       - name: Check Credo
         run: mix credo

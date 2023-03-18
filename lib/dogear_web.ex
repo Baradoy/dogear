@@ -16,6 +16,7 @@ defmodule DogearWeb do
   below. Instead, define any helper function in modules
   and import those modules here.
   """
+  def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
 
   def controller do
     quote do
@@ -24,6 +25,8 @@ defmodule DogearWeb do
       import Plug.Conn
       import DogearWeb.Gettext
       alias DogearWeb.Router.Helpers, as: Routes
+
+      unquote(verified_routes())
     end
   end
 
@@ -45,7 +48,7 @@ defmodule DogearWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {DogearWeb.LayoutView, "live.html"}
+        layout: {DogearWeb.LayoutView, :live}
 
       unquote(view_helpers())
     end
@@ -96,9 +99,20 @@ defmodule DogearWeb do
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
 
+      unquote(verified_routes())
+
       import DogearWeb.ErrorHelpers
       import DogearWeb.Gettext
       alias DogearWeb.Router.Helpers, as: Routes
+    end
+  end
+
+  def verified_routes do
+    quote do
+      use Phoenix.VerifiedRoutes,
+        endpoint: DogearWeb.Endpoint,
+        router: DogearWeb.Router,
+        statics: DogearWeb.static_paths()
     end
   end
 
