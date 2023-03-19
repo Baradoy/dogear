@@ -22,7 +22,8 @@ config :dogear, DogearWeb.Endpoint,
   secret_key_base: "UXjewM0EaJS/a5RO2ppOtEnJgWDtazWGDarTYyrXXeY23sMDyuo8wH9QspZO623J",
   watchers: [
     # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
-    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
+    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
+    tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]}
   ]
 
 # ## SSL Support
