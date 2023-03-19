@@ -76,6 +76,21 @@ defmodule DogearWeb.BookLive.Show do
     {:noreply, socket}
   end
 
+  def handle_event("rewindTime", _params, socket) do
+    {:ok, bookmark} = Navigation.rewind(socket.assigns.book, socket.assigns.bookmark)
+
+    manifets_item = Manifests.get_item_by_idref(socket.assigns.book.manifest, bookmark.idref)
+
+    socket =
+      socket
+      |> assign(:bookmark, bookmark)
+      |> assign(:manifets_item, manifets_item)
+      |> assign_render()
+      |> push_scroll()
+
+    {:noreply, socket}
+  end
+
   def handle_event("zoomIn", _params, socket) do
     text_size = Enum.min([socket.assigns.text_size + 1, 30])
     {:noreply, socket |> assign(:text_size, text_size) |> assign_font_class()}
@@ -152,7 +167,7 @@ defmodule DogearWeb.BookLive.Show do
     socket
   end
 
-  def topic(socket), do: "bookmark:#{socket.assigns.bookmark.id}"
+  def topic(socket), do: "book:#{socket.assigns.book.id}"
 
   def assign_font_class(socket) do
     socket =

@@ -9,7 +9,7 @@ defmodule DogearWeb.BookmarkLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    case Bookmarks.get_latest_bookmark() do
+    case Bookmarks.fetch_latest_bookmark() do
       {:ok, bookmark} ->
         socket =
           socket

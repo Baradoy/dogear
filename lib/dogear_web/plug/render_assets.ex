@@ -17,9 +17,11 @@ defmodule DogearWeb.Plug.RenderAssets do
     case conn.assigns.path_manifest_item do
       %{media_type: "application/xhtml+xml"} = item ->
         Logger.info("Navigating to bookmark for #{inspect(item)}")
-        Navigation.to_manifest_item(conn.assigns.book, conn.assigns.bookmark, item)
 
-        conn
+        {:ok, bookmark} =
+          Navigation.to_manifest_item(conn.assigns.book, conn.assigns.bookmark, item)
+
+        conn |> assign(:bookmark, bookmark)
 
       %{media_type: _media_type} = item ->
         Logger.info("Sending raw asset for #{inspect(item)}")

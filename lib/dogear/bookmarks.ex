@@ -8,12 +8,10 @@ defmodule Dogear.Bookmarks do
   alias Dogear.Repo
 
   alias Dogear.Books.Spines
-  alias Dogear.Books.Spines.Spine
-  alias Dogear.Books.Manifests.Item
   alias Dogear.Schema.Book
   alias Dogear.Schema.Bookmark
 
-  def get_latest_bookmark() do
+  def fetch_latest_bookmark() do
     case list_bookmarks(order_by: [desc: :updated_at]) do
       [head | _] -> {:ok, head}
       [] -> {:error, "No bookmark"}
@@ -22,11 +20,18 @@ defmodule Dogear.Bookmarks do
 
   @spec get_or_create_bookmark_by_book(Book.t()) :: Bookmark.t()
   def get_or_create_bookmark_by_book(%Book{} = book) do
-    case Repo.get_by(Bookmark, book_id: book.id) do
-      bookmark when not is_nil(bookmark) ->
+    Bookmark
+    |> compose_query(
+      order_by: [desc: :updated_at],
+      limit: 1,
+      book_id: book.id
+    )
+    |> Repo.all()
+    |> case do
+      [bookmark | _] ->
         bookmark
 
-      nil ->
+      [] ->
         idref = Spines.get_idref(book.spine, 0)
 
         {:ok, bookmark} =
@@ -34,21 +39,6 @@ defmodule Dogear.Bookmarks do
 
         bookmark
     end
-  end
-
-  def navigate_bookmark(%Spine{} = spine, %Bookmark{} = bookmark, offset)
-      when is_integer(offset) do
-    index = bookmark.spine_index + offset
-
-    idref = Spines.get_idref(spine, index)
-
-    update_bookmark(bookmark, %{anchor_id: "#", idref: idref, spine_index: index})
-  end
-
-  def navigate_bookmark(%Spine{} = spine, %Bookmark{} = bookmark, %Item{} = manifest_item) do
-    index = Spines.get_index(spine, manifest_item.id)
-
-    update_bookmark(bookmark, %{anchor_id: "#", idref: manifest_item.id, spine_index: index})
   end
 
   @doc """
@@ -71,6 +61,8 @@ defmodule Dogear.Bookmarks do
   end
 
   def query(queryable, {:order_by, order_by}), do: Query.order_by(queryable, ^order_by)
+  def query(queryable, {:limit, limit}), do: Query.limit(queryable, ^limit)
+  def query(queryable, {:book_id, book_id}), do: Query.where(queryable, book_id: ^book_id)
 
   @doc """
   Gets a single bookmark.
