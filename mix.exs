@@ -59,7 +59,8 @@ defmodule Dogear.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:credo, "~> 1.6.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1.0", only: [:dev, :test], runtime: false},
-      {:tailwind, "~> 0.1", runtime: Mix.env() == :dev}
+      {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
+      {:heroicons, "~> 0.5.0"}
     ]
   end
 

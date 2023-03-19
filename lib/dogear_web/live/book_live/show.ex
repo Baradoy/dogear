@@ -24,6 +24,7 @@ defmodule DogearWeb.BookLive.Show do
       |> assign(:manifest_item, fn %{book: book, bookmark: bookmark} ->
         Manifests.get_item_by_idref(book.manifest, bookmark.idref)
       end)
+      |> assign_font_class()
 
     {:ok, socket}
   end
@@ -73,6 +74,26 @@ defmodule DogearWeb.BookLive.Show do
       |> assign_render()
 
     {:noreply, socket}
+  end
+
+  def handle_event("zoomIn", _params, socket) do
+    text_size = Enum.min([socket.assigns.text_size + 1, 30])
+    {:noreply, socket |> assign(:text_size, text_size) |> assign_font_class()}
+  end
+
+  def handle_event("zoomOut", _params, socket) do
+    text_size = Enum.max([socket.assigns.text_size - 1, 04])
+    {:noreply, socket |> assign(:text_size, text_size) |> assign_font_class()}
+  end
+
+  def handle_event("lineIncrease", _params, socket) do
+    line_height = Enum.min([socket.assigns.line_height + 1, 30])
+    {:noreply, socket |> assign(:line_height, line_height) |> assign_font_class()}
+  end
+
+  def handle_event("lineDecrease", _params, socket) do
+    line_height = Enum.max([socket.assigns.line_height - 1, 10])
+    {:noreply, socket |> assign(:line_height, line_height) |> assign_font_class()}
   end
 
   def handle_event("updateAnchor", %{"anchorId" => anchor_id}, socket) do
@@ -132,4 +153,20 @@ defmodule DogearWeb.BookLive.Show do
   end
 
   def topic(socket), do: "bookmark:#{socket.assigns.bookmark.id}"
+
+  def assign_font_class(socket) do
+    socket =
+      socket
+      |> assign_new(:text_size, fn -> 14 end)
+      |> assign_new(:line_height, fn -> 10 end)
+
+    text_size = socket.assigns.text_size |> Decimal.div(10) |> Decimal.round(1)
+
+    line_height =
+      socket.assigns.line_height
+      |> Decimal.div(10)
+      |> Decimal.round(1)
+
+    assign(socket, :font_class, " text-[#{text_size}em] leading-[#{line_height}em] ")
+  end
 end
