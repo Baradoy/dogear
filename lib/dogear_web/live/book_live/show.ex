@@ -11,6 +11,7 @@ defmodule DogearWeb.BookLive.Show do
   alias Dogear.Books.Manifests
   alias Dogear.Books.Renderer
   alias Dogear.Document
+  alias DogearWeb.Navigation
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
@@ -23,13 +24,6 @@ defmodule DogearWeb.BookLive.Show do
       |> assign(:manifest_item, fn %{book: book, bookmark: bookmark} ->
         Manifests.get_item_by_idref(book.manifest, bookmark.idref)
       end)
-
-    # socket =
-    #   socket
-    #   |> assign(:page_title, socket.assigns.book.title)
-    #   |> assign_render()
-    #   |> push_scroll()
-    #   |> subscribe()
 
     {:ok, socket}
   end
@@ -54,8 +48,7 @@ defmodule DogearWeb.BookLive.Show do
 
   @impl true
   def handle_event("nextPlace", _params, socket) do
-    {:ok, bookmark} =
-      Bookmarks.navigate_bookmark(socket.assigns.book.spine, socket.assigns.bookmark, +1)
+    {:ok, bookmark} = Navigation.by_offset(socket.assigns.book, socket.assigns.bookmark, +1)
 
     manifets_item = Manifests.get_item_by_idref(socket.assigns.book.manifest, bookmark.idref)
 
@@ -64,15 +57,12 @@ defmodule DogearWeb.BookLive.Show do
       |> assign(:bookmark, bookmark)
       |> assign(:manifets_item, manifets_item)
       |> assign_render()
-
-    Phoenix.PubSub.broadcast(Dogear.PubSub, topic(socket), {"updateIdref", bookmark, self()})
 
     {:noreply, socket}
   end
 
   def handle_event("previousPlace", _params, socket) do
-    {:ok, bookmark} =
-      Bookmarks.navigate_bookmark(socket.assigns.book.spine, socket.assigns.bookmark, -1)
+    {:ok, bookmark} = Navigation.by_offset(socket.assigns.book, socket.assigns.bookmark, -1)
 
     manifets_item = Manifests.get_item_by_idref(socket.assigns.book.manifest, bookmark.idref)
 
@@ -82,19 +72,11 @@ defmodule DogearWeb.BookLive.Show do
       |> assign(:manifets_item, manifets_item)
       |> assign_render()
 
-    Phoenix.PubSub.broadcast(Dogear.PubSub, topic(socket), {"updateIdref", bookmark, self()})
-
     {:noreply, socket}
   end
 
   def handle_event("updateAnchor", %{"anchorId" => anchor_id}, socket) do
-    {:ok, _bookmark} = Bookmarks.update_bookmark(socket.assigns.bookmark, %{anchor_id: anchor_id})
-
-    Phoenix.PubSub.broadcast(
-      Dogear.PubSub,
-      topic(socket),
-      {"updateAnchor", %{anchor_id: anchor_id}, self()}
-    )
+    {:ok, _bookmark} = Navigation.to_anchor_id(socket.assigns.bookmark, anchor_id)
 
     {:noreply, socket}
   end

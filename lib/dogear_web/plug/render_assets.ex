@@ -1,21 +1,23 @@
 defmodule DogearWeb.Plug.RenderAssets do
   @moduledoc """
-  Matches the manifest href from the bookmark to the URL
+  Matches the manifest href to an asset or a bookmark
   This allows links and references rom inside the book.
   """
 
   require Logger
 
   import Plug.Conn
-
   alias Dogear.Zip
+  alias DogearWeb.Navigation
 
   def init(opts \\ %{}), do: opts
 
   def call(conn, _opts) do
     case conn.assigns.path_manifest_item do
       %{media_type: "application/xhtml+xml"} = item ->
-        Logger.info("Continuing for #{inspect(item)}")
+        Logger.info("Navigating to bookmark for #{inspect(item)}")
+        Navigation.to_manifest_item(conn.assigns.book, conn.assigns.bookmark, item)
+
         conn
 
       %{media_type: _media_type} = item ->
@@ -31,19 +33,20 @@ defmodule DogearWeb.Plug.RenderAssets do
   def raw_asset_response(conn) do
     href = conn.assigns.path_manifest_item.href
     manifest = conn.assigns.book.manifest
-    full_path = Path.join(manifest.root_path,href)
+    full_path = Path.join(manifest.root_path, href)
 
-    with  {:ok, binary} <- Zip.file(conn.assigns.book.zip_handle, full_path) do
-      opts = [
-        content_type: conn.assigns.path_manifest_item.media_type,
-        disposition: :inline,
-        filename: href
-      ]
+    case Zip.file(conn.assigns.book.zip_handle, full_path) do
+      {:ok, binary} ->
+        opts = [
+          content_type: conn.assigns.path_manifest_item.media_type,
+          disposition: :inline,
+          filename: href
+        ]
 
-      conn
-      |> Phoenix.Controller.send_download({:binary, binary}, opts)
-      |> halt()
-    else
+        conn
+        |> Phoenix.Controller.send_download({:binary, binary}, opts)
+        |> halt()
+
       error ->
         Logger.warn("assert_response failed error:#{inspect(error)}")
 

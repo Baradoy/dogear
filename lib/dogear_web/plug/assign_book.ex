@@ -11,7 +11,6 @@ defmodule DogearWeb.Plug.AssignBook do
   alias Dogear.Bookmarks
 
   alias Dogear.Schema.Bookmark
-  alias Dogear.Schema.Bookmark
 
   def init(opts \\ %{}), do: opts
 
