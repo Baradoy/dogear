@@ -1,4 +1,4 @@
-defmodule DogearWeb.Plug.ManifestAssigns do
+defmodule DogearWeb.Plug.AssignManifest do
   @moduledoc """
   Put Manifest Items from the path and bookmark into the assigns.
   """
@@ -20,9 +20,11 @@ defmodule DogearWeb.Plug.ManifestAssigns do
 
   defp get_path_manifest_item(%{path_params: %{"href" => [_ | _] = href_glob}} = conn) do
     manifest = conn.assigns.book.manifest
-    href = Path.join(href_glob) |> Path.relative_to(manifest.root_path)
 
-    Manifests.get_item_by_href(manifest, href)
+    href_glob
+    |> Path.join()
+    |> Path.relative_to(manifest.root_path)
+    |> then(&Manifests.get_item_by_href(manifest, &1))
   end
 
   defp get_path_manifest_item(_conn), do: nil

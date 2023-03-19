@@ -1,4 +1,4 @@
-defmodule DogearWeb.Plug.AssetAssigns do
+defmodule DogearWeb.Plug.AssignBook do
   @moduledoc """
   Loads the book from the id on the path and puts it into conn.assigns.
 
@@ -10,7 +10,6 @@ defmodule DogearWeb.Plug.AssetAssigns do
   alias Dogear.Books
   alias Dogear.Bookmarks
 
-  alias Dogear.Schema.Bookmark
   alias Dogear.Schema.Bookmark
 
   def init(opts \\ %{}), do: opts
