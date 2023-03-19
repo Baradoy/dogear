@@ -7,6 +7,7 @@ defmodule DogearWeb.Plug.RenderAssets do
   require Logger
 
   import Plug.Conn
+  alias Dogear.Books.Manifests
   alias Dogear.Zip
   alias DogearWeb.Navigation
 
@@ -31,11 +32,10 @@ defmodule DogearWeb.Plug.RenderAssets do
   end
 
   def raw_asset_response(conn) do
-    href = conn.assigns.path_manifest_item.href
-    manifest = conn.assigns.book.manifest
-    full_path = Path.join(manifest.root_path, href)
+    manifest_item = conn.assigns.path_manifest_item
+    href = Manifests.get_href(conn.assigns.book.manifest, manifest_item.id)
 
-    case Zip.file(conn.assigns.book.zip_handle, full_path) do
+    case Zip.file(conn.assigns.book.zip_handle, href) do
       {:ok, binary} ->
         opts = [
           content_type: conn.assigns.path_manifest_item.media_type,
