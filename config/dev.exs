@@ -17,7 +17,7 @@ config :dogear, DogearWeb.Endpoint,
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   http: [ip: {127, 0, 0, 1}, port: 4000],
   check_origin: false,
-  code_reloader: false,
+  code_reloader: true,
   debug_errors: true,
   secret_key_base: "UXjewM0EaJS/a5RO2ppOtEnJgWDtazWGDarTYyrXXeY23sMDyuo8wH9QspZO623J",
   watchers: [

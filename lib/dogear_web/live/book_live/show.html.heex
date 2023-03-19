@@ -1,12 +1,14 @@
-<div class="wrapper">
-  <header>
-    <%= @book.title %> <a phx-click="previousPlace" href="#">Previous</a>
-    <a phx-click="nextPlace" href="#">Next</a>
+<div class="flex flex-col">
+  <header class="flex flex-row space-x-4">
+    <span class="grow h-14 bold"><%= @book.title %></span>
+    <span><a phx-click="previousPlace" href="#">Previous</a></span>
+    <span><a phx-click="nextPlace" href="#">Next</a></span>
   </header>
-  <div id="dog-ear-container" phx-hook="IntersectionObserver" class="content">
+  <div id="dog-ear-container" phx-hook="IntersectionObserver">
     <%= raw(@render) %>
   </div>
-  <footer>
-    <a phx-click="previousPlace" href="#">Previous</a> <a phx-click="nextPlace" href="#">Next</a>
+  <footer class="flex flex-row space-x-4">
+    <span><a phx-click="previousPlace" href="#">Previous</a></span>
+    <span><a phx-click="nextPlace" href="#">Next</a></span>
   </footer>
 </div>
