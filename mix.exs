@@ -58,7 +58,9 @@ defmodule Dogear.MixProject do
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
       {:credo, "~> 1.6.0", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.1.0", only: [:dev, :test], runtime: false}
+      {:dialyxir, "~> 1.1.0", only: [:dev, :test], runtime: false},
+      {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
+      {:heroicons, "~> 0.5.0"}
     ]
   end
 
@@ -81,7 +83,8 @@ defmodule Dogear.MixProject do
         "test",
         "dialyzer",
         "credo"
-      ]
+      ],
+      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]
     ]
   end
 end
