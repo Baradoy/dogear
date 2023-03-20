@@ -39,8 +39,9 @@ defmodule DogearWeb.Router do
     scope "/books/:id" do
       pipe_through :assets
 
-      # live "/read/", BookLive.Show, :show
       live "/read/*href", BookLive.Show, :show
+      # Awkward handling for books that have "../" relative paths
+      live "/*href", BookLive.Show, :show
     end
   end
 

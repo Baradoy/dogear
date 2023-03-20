@@ -36,7 +36,7 @@ defmodule Dogear.Schema.Book do
     field :spine, :any, virtual: true
     field :manifest, :any, virtual: true
 
-    has_many :bookmars, Bookmark, on_delete: :delete_all
+    has_many :bookmarks, Bookmark, on_delete: :delete_all
 
     timestamps()
   end
